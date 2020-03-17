@@ -1,0 +1,271 @@
+
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Systematic Review Chart Maker</title>
+</head>
+<body>
+<h1>Systematic Review chart</h1>
+<p>Enter information about your systematic review to create a chart.</p>
+<ul>
+<li>Fields with an asterisk* are required, all others are optional.</li>
+<li>If you have more than one alternative strategy for your concept, enter them separated by semi-colons. (e.g. Concept: Dietary Supplements, Alternative Strategies: Vitamins; Minerals; Probiotics)</li>
+<li>Likewise, if you have more than one limit, please enter them separated by semicolons.</li>
+<li>If you enter any Boolean operators (e.g. NOT), please enter them in all capitals.</li>
+</ul>
+
+
+<form id="tagType">
+<label for="srQuestion">Systematic Review Question or Topic*:</label>
+<input type="text" id="userQuestion"/><br>
+<label for="srConcept1">First Concept*:</label>
+<input type="text" id="userConcept1"/>
+<label for="srAltStrats1">Alternative Strategies:</label>
+<input type="text" id="userAltStrats1"/><br>
+<label for="srConcept2">Second Concept:</label>
+<input type="text" id="userConcept2"/>
+<label for="srAltStrats2">Alternative Strategies:</label>
+<input type="text" id="userAltStrats2"/><br>
+<label for="srConcept3">Third Concept:</label>
+<input type="text" id="userConcept3"/>
+<label for="srAltStrats3">Alternative Strategies:</label>
+<input type="text" id="userAltStrats3"/><br>
+<label for="srConcept4">Fourth Concept:</label>
+<input type="text" id="userConcept4"/>
+<label for="srAltStrats4">Alternative Strategies:</label>
+<input type="text" id="userAltStrats4"/><br>
+<label for="srConcept5">Fifth Concept:</label>
+<input type="text" id="userConcept5"/>
+<label for="srAltStrats5">Alternative Strategies:</label>
+<input type="text" id="userAltStrats5"/><br>
+<label for="srConcept6">Sixth Concept:</label>
+<input type="text" id="userConcept6"/>
+<label for="srAltStrats6">Alternative Strategies:</label>
+<input type="text" id="userAltStrats6"/><br>
+<label for="srLimits">Limits:</label>
+<input type="text" id="userLimits"/><br>
+<input type="submit" id="submitBtn" value="Submit"/>
+</form>
+
+<canvas id="chartCanvas" width="1000" height="600" style="border:1px solid #000000;">
+</canvas>
+<script>
+
+let submitButton = document.getElementById('submitBtn');
+submitButton.addEventListener("click", function(event){
+event.preventDefault();
+
+//creates variables that hold the canvas width and height. If these are changed above they have to be changed manually. (Might be able to write code to fix that?)
+let canvasWidth = 1000;
+let canvasHeight = 600;
+
+//records the question that the user entered into the form
+let srQuestion = document.getElementById('userQuestion').value;
+
+//counts the number of concepts that the user entered into the form:
+let numConcepts = 0;
+let countingArray = [];
+countingArray[0] = document.getElementById('userConcept1').value;
+countingArray[1] = document.getElementById('userConcept2').value;
+countingArray[2] = document.getElementById('userConcept3').value;
+countingArray[3] = document.getElementById('userConcept4').value;
+countingArray[4] = document.getElementById('userConcept5').value;
+countingArray[5] = document.getElementById('userConcept6').value;
+for (i = 0; i < 6; i++){
+if (countingArray[i] == ""){
+numConcepts = i;
+break
+}
+}
+
+//check for Limits and store any in an array
+let limitString = document.getElementById('userLimits').value;
+let srLimits = ["Limits"];
+if (limitString != ""){
+let patt = /\;/g;
+if (patt.test(limitString)){
+let tempArray = limitString.split(";");
+for (j = 0; j < tempArray.length; j++){
+srLimits[j+1] = tempArray[j];
+}
+}
+else{
+srLimits[1] = limitString;
+}
+}
+
+let srConcepts = new Array(numConcepts);
+for (var i = 0; i < srConcepts.length; i++) {
+	srConcepts[i] = [];
+}
+
+//get the concepts
+for (i = 0; i < numConcepts; i++){
+srConcepts[i][0] = countingArray[i];
+}
+
+
+//get the alternative strategies
+let altStratArray = [];
+altStratArray[0] = document.getElementById('userAltStrats1').value;
+altStratArray[1] = document.getElementById('userAltStrats2').value;
+altStratArray[2] = document.getElementById('userAltStrats3').value;
+altStratArray[3] = document.getElementById('userAltStrats4').value;
+altStratArray[4] = document.getElementById('userAltStrats5').value;
+altStratArray[5] = document.getElementById('userAltStrats6').value;
+
+//This puts the Alternative Strategies into the concept array
+for (i = 0; i < numConcepts; i++){
+if (altStratArray[i] != ""){
+let patt = /\;/g;
+if (patt.test(altStratArray[i])){
+let tempArray = altStratArray[i].split(";");
+for (j = 0; j < tempArray.length; j++){
+srConcepts[i][j+1] = tempArray[j];
+}
+}
+else{
+srConcepts[i][1] = altStratArray[i];
+}
+}
+}
+
+//add the limits to the Concepts list
+if (srLimits.length > 1){
+srConcepts[numConcepts] = [];
+for (i = 0; i < srLimits.length; i++){
+srConcepts[numConcepts][i] = srLimits[i];
+}
+numConcepts++;
+}
+
+//finds the longest number of alternative strategies in the concepts:
+let longestConcept = 0;
+for (i = 0; i < numConcepts; i++){
+let thisConceptLength = srConcepts[i].length;
+if (thisConceptLength > longestConcept){
+longestConcept = thisConceptLength;
+}
+}
+
+//splits up the available space according to the number of concepts
+let conceptWidth = canvasWidth / numConcepts;
+
+//accesses the canvas so it can be manipulated
+var canvas = document.getElementById("chartCanvas");
+var ctx = canvas.getContext("2d");
+
+//sets the font and measures the size of the question so it can be centred in the canvas
+ctx.font = "14px Geneva";
+let srQuestWidth = ctx.measureText(srQuestion).width;
+let srStartPt = (canvasWidth/2) - (srQuestWidth/2);
+
+//Draws a blue box for the question to be in:
+ctx.fillStyle = "#C6F5FF";
+ctx.fillRect(srStartPt-10,15,srQuestWidth+20,40);
+
+//put text in the box:
+ctx.fillStyle = "black";
+ctx.fillText(srQuestion, srStartPt, 40);
+
+//Draws a line down from the box:
+ctx.moveTo(canvasWidth/2, 55);
+ctx.lineTo(canvasWidth/2, 90);
+ctx.stroke();
+
+//Draws the horizontal line for the concepts:
+ctx.moveTo(conceptWidth/2, 90);
+ctx.lineTo(canvasWidth - (conceptWidth/2), 90);
+ctx.stroke();
+
+//Draws the vertical lines for each concept:
+for (var j = 0; j < numConcepts; j++) {
+ctx.moveTo((conceptWidth/2) + (j*conceptWidth), 90);
+ctx.lineTo((conceptWidth/2) + (j*conceptWidth), 125);
+ctx.stroke();
+}
+
+//creates a for loop to do the following until concepts and limits are added
+for (rep = 0; rep < longestConcept; rep++){
+
+
+//Draws the boxes for each concept, alt strat, or limit:
+for (var m = 0; m < numConcepts; m++) {
+if (rep%2 == 0){
+ctx.fillStyle = "#C6F5FF";
+}
+else{
+ctx.fillStyle = "#E6FAFF";
+}
+if (srConcepts[m].length > rep){
+ctx.fillRect((10 + conceptWidth*m), (125+(rep*40)), conceptWidth-10, 40);
+}
+}
+
+
+//Displays the text for each concept, alt strat or limit:
+ctx.fillStyle = "black";
+ctx.font = "10px Geneva";
+for (var n = 0; n < numConcepts; n++){
+ if (srConcepts[n].length > rep){
+  let patt = /^NOT/;
+  if (patt.test(srConcepts[n][rep])){
+   ctx.fillStyle = "darkred";
+  }
+  else{
+   ctx.fillStyle = "black";
+   let patt2 = /AND/;
+   if (patt2.test(srConcepts[n][rep])){
+    ctx.fillStyle = "blue";
+   }
+  }
+  let conceptTextWidth = ctx.measureText(srConcepts[n][rep]).width;
+  if (conceptTextWidth > conceptWidth){
+  //wrap that anything that's too long
+  let tempArray = srConcepts[n][rep].split(" ");
+  let firstRow = "";
+  let secondRow = "";
+  let firstRowFull = false;
+  let firstTime = true;
+  for (p = 0; p < tempArray.length; p++){
+   let tempString = firstRow + " " + tempArray[p];
+   if ((ctx.measureText(tempString).width < (conceptWidth-20)) && !firstRowFull){
+    if (p == 0){
+     firstRow = tempArray[p];
+    }
+    else{
+     firstRow = firstRow + " " + tempArray[p];
+    }
+   }
+   else{
+    firstRowFull = true;
+    if (firstTime){
+     secondRow = tempArray[p];
+     firstTime = false;
+    }
+    else{
+     secondRow = secondRow + " " + tempArray[p];
+    }
+   }
+  }
+  ctx.fillText(firstRow, 15 + (conceptWidth*n), (140+(rep*40)));
+  ctx.fillText(secondRow, 15 + (conceptWidth*n), (160+(rep*40)));
+ }
+ else{
+  ctx.fillText(srConcepts[n][rep], 15 + (conceptWidth*n), (150+(rep*40)));
+ }
+}
+}
+
+
+//end the for loop that repeats until all concepts and limits are added
+}
+
+
+//end the submitButton event listener
+})
+
+</script>
+
+</body>
+</html>
