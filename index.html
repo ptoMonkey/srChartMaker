@@ -163,6 +163,8 @@ let srStartPt = (canvasWidth/2) - (srQuestWidth/2);
 //Draws a blue box for the question to be in:
 ctx.fillStyle = "#C6F5FF";
 ctx.fillRect(srStartPt-10,15,srQuestWidth+20,40);
+ctx.strokeStyle = "black";
+ctx.strokeRect(srStartPt-10,15,srQuestWidth+20,40);
 
 //put text in the box:
 ctx.fillStyle = "black";
@@ -199,6 +201,8 @@ ctx.fillStyle = "#E6FAFF";
 }
 if (srConcepts[m].length > rep){
 ctx.fillRect((10 + conceptWidth*m), (125+(rep*40)), conceptWidth-10, 40);
+ctx.strokeStyle = "black";
+ctx.strokeRect((10 + conceptWidth*m), (125+(rep*40)), conceptWidth-10, 40);
 }
 }
 
@@ -220,7 +224,7 @@ for (var n = 0; n < numConcepts; n++){
    }
   }
   let conceptTextWidth = ctx.measureText(srConcepts[n][rep]).width;
-  if (conceptTextWidth > conceptWidth){
+  if (conceptTextWidth > (conceptWidth-20)){
   //wrap that anything that's too long
   let tempArray = srConcepts[n][rep].split(" ");
   let firstRow = "";
