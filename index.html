@@ -89,7 +89,13 @@ let patt = /\;/g;
 if (patt.test(limitString)){
 let tempArray = limitString.split(";");
 for (j = 0; j < tempArray.length; j++){
+let patt2 = /^ /;
+if (patt2.test(tempArray[j])){
+srLimits[j+1] = tempArray[j].substr(1);
+}
+else{
 srLimits[j+1] = tempArray[j];
+}
 }
 }
 else{
@@ -124,7 +130,13 @@ let patt = /\;/g;
 if (patt.test(altStratArray[i])){
 let tempArray = altStratArray[i].split(";");
 for (j = 0; j < tempArray.length; j++){
+let patt2 = /^ /;
+if (patt2.test(tempArray[j])){
+srConcepts[i][j+1] = tempArray[j].substr(1);
+}
+else{
 srConcepts[i][j+1] = tempArray[j];
+}
 }
 }
 else{
