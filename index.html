@@ -76,6 +76,9 @@ if (countingArray[i] == ""){
 numConcepts = i;
 break
 }
+else if(countingArray[i] != "" && i == 5){
+numConcepts = i+1;
+}
 }
 
 //check for Limits and store any in an array
@@ -154,6 +157,9 @@ let conceptWidth = canvasWidth / numConcepts;
 //accesses the canvas so it can be manipulated
 var canvas = document.getElementById("chartCanvas");
 var ctx = canvas.getContext("2d");
+//clears the canvas in case there was something there before.
+ctx.clearRect(0,0,canvasWidth,canvasHeight);
+ctx.beginPath();
 
 //sets the font and measures the size of the question so it can be centred in the canvas
 ctx.font = "14px Geneva";
